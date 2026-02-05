@@ -1,0 +1,36 @@
+name: CI/CD Private Server Deployment
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+    build-and-deploy:
+      runs-on: self-hosted  # GitHub-hosted → Self-hosted
+      
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v3
+      
+        - name: Build Docker image
+          run: |
+                docker build -t my-image:latest ./mini-app
+      
+        - name: Docker Hub Login
+          uses: docker/login-action@v2
+          with:
+                username: ${{ secrets.DOCKER_USERNAME }}
+                password: ${{ secrets.DOCKER_PASSWORD }}
+      
+        - name: Push Docker image
+          run: |
+            docker tag my-image:latest mydockerhubusername/my-image:latest
+            docker push mydockerhubusername/my-image:latest
+      
+        - name: Deploy to Private Server
+          uses: dawidd6/action-ansible-playbook@v2
+          with:
+            playbook: deploy.yml
+            inventory: hosts.ini
+            key: ${{ secrets.PRIVATE_KEY }}
+      

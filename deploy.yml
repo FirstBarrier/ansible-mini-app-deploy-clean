@@ -1,0 +1,23 @@
+- name: Deploy Docker container on Private server
+  hosts: private
+  become: true
+
+  tasks:
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull latest Docker image from Docker Hub
+      docker_image:
+        name: mydockerhubusername/my-image
+        source: pull
+
+    - name: Run or restart Docker container
+      docker_container:
+        name: my-app
+        image: mydockerhubusername/my-image:latest
+        state: restarted
+        restart_policy: always
+

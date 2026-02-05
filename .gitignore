@@ -1,0 +1,4 @@
+actions-runner/
+*.tar.gz
+*.zip
+node_modules/

@@ -1,0 +1,34 @@
+---
+- name: Deploy Mini Web App Container
+  hosts: web
+  become: true
+
+  tasks:
+    # 1️⃣ 최신 이미지 Pull
+    - name: Pull latest mini-app image
+      docker_image:
+        name: wndlswo/mini-app
+        tag: latest
+        source: pull
+
+    # 2️⃣ 기존 컨테이너 중지 (없으면 무시)
+    - name: Stop existing mini-app container if exists
+      shell: docker stop mini-app
+      ignore_errors: true
+
+    # 3️⃣ 기존 컨테이너 제거 (없으면 무시)
+    - name: Remove existing mini-app container if exists
+      shell: docker rm mini-app
+      ignore_errors: true
+
+    # 4️⃣ 컨테이너 실행
+    - name: Run mini-app container
+      docker_container:
+        name: mini-app
+        image: wndlswo/mini-app:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "8080:8080"
+        env:
+          APP_VERSION: "1.0.1"
