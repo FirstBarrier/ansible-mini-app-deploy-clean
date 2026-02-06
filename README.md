@@ -53,6 +53,7 @@ ansible my_computer -i hosts.ini -m ping
 순정 리눅스 서버를 도커 엔진이 깔린 서버로 자동 변신시킵니다. (비밀번호 입력 필수; WSL 설치시 입력했던 비밀번호)
 ```bash
 ansible-playbook -i hosts.ini deploy_mini_app.yml -K
+
 ```
 
 ### Step 3: 도커라이징 및 실행 (App Deployment)
@@ -66,7 +67,7 @@ cd mini-app
 docker build -t my-mini-app .
 
 # 컨테이너 실행 (8080 포트 개방)
-docker run -d -p 8080:8080 my-mini-app:latest
+docker run -d -p 8082:8080 my-mini-app:latest
 ```
 
 ### Step 4: 깃허브 러너 사용시 스크린 등용
@@ -74,7 +75,7 @@ docker run -d -p 8080:8080 my-mini-app:latest
 sudo apt install -y screen
 screen -S github-runner
 ./run.sh
-
+--> 현재 깃 허브 러너 설치시 용량이 초과되서 실행되는 현상 발생
 
 Ctrl + a → d 누르면 detach → 터미널 닫아도 계속 실행
 
