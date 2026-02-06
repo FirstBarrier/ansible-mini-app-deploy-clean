@@ -1,0 +1,48 @@
+---
+- name: Enable NAT on Monitoring EC2
+  hosts: nat
+  become: true
+
+  vars:
+    private_cidr: 10.0.0.0/16
+    outbound_iface: eth0
+
+  tasks:
+    - name: Enable IPv4 forwarding (runtime)
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        state: present
+        reload: yes
+
+    - name: Ensure IPv4 forwarding persists
+      lineinfile:
+        path: /etc/sysctl.conf
+        regexp: '^net.ipv4.ip_forward'
+        line: 'net.ipv4.ip_forward=1'
+
+    - name: Add NAT masquerade rule
+      iptables:
+        table: nat
+        chain: POSTROUTING
+        source: "{{ private_cidr }}"
+        out_interface: "{{ outbound_iface }}"
+        jump: MASQUERADE
+        state: present
+
+    - name: Allow forwarding from private subnet
+      iptables:
+        chain: FORWARD
+        source: "{{ private_cidr }}"
+        jump: ACCEPT
+        state: present
+
+    - name: Install iptables-persistent
+      apt:
+        name: iptables-persistent
+        state: present
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    - name: Save iptables rules
+      command: netfilter-persistent save
